@@ -96,8 +96,7 @@ void listen()
 					if (!datas[i].compare("quit"))
 					{
 						reporter->info("Request quit");
-						unlink("/var/lock/matt_daemon.lock");
-						exit(EXIT_SUCCESS);
+						return;
 					}
 					reporter->info("User input: " + datas[i]);
 					datas[i].clear();
