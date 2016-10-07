@@ -6,7 +6,7 @@
 #    By: acazuc <acazuc@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/11/25 06:50:12 by acazuc            #+#    #+#              #
-#    Updated: 2016/02/10 18:01:36 by acazuc           ###   ########.fr        #
+#    Updated: 2016/10/07 18:43:50 by acazuc           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,16 +16,16 @@ CC = g++ -std=c++11
 
 CFLAGS = -Wall -Wextra -Werror -Ofast
 
-INCLUDES_PATH = -I srcs/
+INCLUDES_PATH = -I src/
 
-SRCS_PATH = srcs/
+SRCS_PATH = src/
 
 SRCS_NAME = Main.cpp \
 			Tintin_reporter.cpp \
 
 SRCS = $(addprefix $(SRCS_PATH), $(SRCS_NAME))
 
-OBJS_PATH = objs/
+OBJS_PATH = obj/
 
 OBJS_NAME = $(SRCS_NAME:.cpp=.o)
 
