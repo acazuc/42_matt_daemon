@@ -6,11 +6,11 @@
 #    By: acazuc <acazuc@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/11/25 06:50:12 by acazuc            #+#    #+#              #
-#    Updated: 2016/10/07 18:43:50 by acazuc           ###   ########.fr        #
+#    Updated: 2016/10/08 12:30:37 by acazuc           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = matt_daemon
+NAME = Matt_daemon
 
 CC = g++ -std=c++11
 

@@ -63,7 +63,7 @@ void listen()
 			{
 				if (errno != EWOULDBLOCK && errno != EAGAIN)
 				{
-					reporter->error("Faied to accept new client on socket");
+					reporter->error("Failed to accept new client on socket");
 					return;
 				}
 				goto readClients;
@@ -222,7 +222,6 @@ void run()
 	listen();
 	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
 	{
-		std::cerr << "Can't unlock: /var/lock/matt_daemon.lock" << std::endl;
 		reporter->error("Can't unlock: /var/lock/matt_daemon.lock");
 		exit(EXIT_FAILURE);
 	}
