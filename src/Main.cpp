@@ -136,17 +136,7 @@ bool checkdir()
 	return (true);
 }
 
-void signal_handler(int siif (!checkdir())
-		exit(EXIT_FAILURE);
-		try
-		{
-		reporter = new Tintin_reporter("/var/log/matt_daemon/matt_daemon.log");
-		}
-		catch (std::exception &e)
-		{
-		std::cerr << "Can't open /var/log/matt_daemon/matt_daemon.log" << std::endl;
-		exit(EXIT_FAILURE);
-		}g)
+void signal_handler(int sig)
 {
 	unlink("/var/lock/matt_daemon.lock");
 	if (!checkdir())
