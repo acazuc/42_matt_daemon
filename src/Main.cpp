@@ -54,36 +54,38 @@ void listen()
 	std::vector<std::string> datas;
 	while (true)
 	{
-		if (clients.size() < 3)
+		struct sockaddr sa;
+		socklen_t sl;
+		int newsock;
+		if ((newsock = accept(sockfd, &sa, &sl)) == -1)
 		{
-			struct sockaddr sa;
-			socklen_t sl;
-			int newsock;
-			if ((newsock = accept(sockfd, &sa, &sl)) == -1)
+			if (errno != EWOULDBLOCK && errno != EAGAIN)
 			{
-				if (errno != EWOULDBLOCK && errno != EAGAIN)
-				{
-					reporter->error("Failed to accept new client on socket");
-					return;
-				}
-				goto readClients;
-			}
-			int flags = fcntl(sockfd, F_GETFL, 0);
-			if (flags < 0)
-			{
-				reporter->error("Failed to set non blocking socket on client");
+				reporter->error("Failed to accept new client on socket");
 				return;
 			}
-			flags |= O_NONBLOCK;
-			if (fcntl(sockfd, F_SETFL, flags) == -1)
-			{
-				reporter->error("Failed to set non blocking socket on client");
-				continue;
-			}
-			reporter->info("New client");
-			clients.push_back(newsock);
-			datas.push_back(std::string());
+			goto readClients;
 		}
+		if (clients.size() >= 3)
+		{
+			close(newsock);
+			goto readClients;
+		}
+		int flags = fcntl(sockfd, F_GETFL, 0);
+		if (flags < 0)
+		{
+			reporter->error("Failed to set non blocking socket on client");
+			return;
+		}
+		flags |= O_NONBLOCK;
+		if (fcntl(sockfd, F_SETFL, flags) == -1)
+		{
+			reporter->error("Failed to set non blocking socket on client");
+			continue;
+		}
+		reporter->info("New client");
+		clients.push_back(newsock);
+		datas.push_back(std::string());
 		readClients:
 		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
 		{
@@ -134,7 +136,17 @@ bool checkdir()
 	return (true);
 }
 
-void signal_handler(int sig)
+void signal_handler(int siif (!checkdir())
+		exit(EXIT_FAILURE);
+		try
+		{
+		reporter = new Tintin_reporter("/var/log/matt_daemon/matt_daemon.log");
+		}
+		catch (std::exception &e)
+		{
+		std::cerr << "Can't open /var/log/matt_daemon/matt_daemon.log" << std::endl;
+		exit(EXIT_FAILURE);
+		}g)
 {
 	unlink("/var/lock/matt_daemon.lock");
 	if (!checkdir())
