@@ -71,7 +71,7 @@ void listen()
 			close(newsock);
 			goto readClients;
 		}
-		int flags = fcntl(sockfd, F_GETFL, 0);
+		flags = fcntl(sockfd, F_GETFL, 0);
 		if (flags < 0)
 		{
 			reporter->error("Failed to set non blocking socket on client");
@@ -180,8 +180,29 @@ void signal_handler(int sig)
 	exit(EXIT_FAILURE);
 }
 
-void run()
+void run(int lockfd)
 {
+	if (chdir("/") == -1)
+	{
+		reporter->error("Can't chdir to /");
+		exit(EXIT_FAILURE);
+	}
+	int nullop = open("/dev/null", O_RDWR);
+	if (nullop == -1)
+	{
+		reporter->error("Can't open /dev/null");
+		exit(EXIT_FAILURE);
+	}
+	if (setsid() == -1)
+	{
+		reporter->error("Can't setsid");
+		exit(EXIT_FAILURE);
+	}
+	if (dup2(nullop, 0) == -1 || dup2(nullop, 1) == -1 || dup2(nullop, 2) == -1)
+	{
+		reporter->error("can't redirect stdin/stdout/stderr to /dev/null");
+		exit(EXIT_FAILURE);
+	}
 	signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, signal_handler);
@@ -196,6 +217,24 @@ void run()
 	signal(SIGBUS, signal_handler);
 	signal(SIGTRAP, signal_handler);
 	signal(SIGSYS, signal_handler);
+	reporter->info("Started");
+	listen();
+	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
+	{
+		reporter->error("Can't unlock: /var/lock/matt_daemon.lock");
+		exit(EXIT_FAILURE);
+	}
+	unlink("/var/lock/matt_daemon.lock");
+	reporter->info("Ended");
+}
+
+int main()
+{
+	if (getuid())
+	{
+		std::cerr << "You must run matt_daemon as root" << std::endl;
+		return (EXIT_FAILURE);
+	}
 	if (!checkdir())
 		exit(EXIT_FAILURE);
 	try
@@ -221,27 +260,10 @@ void run()
 		reporter->error("Can't lock: /var/lock/matt_daemon.lock");
 		exit(EXIT_FAILURE);
 	}
-	listen();
-	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
-	{
-		reporter->error("Can't unlock: /var/lock/matt_daemon.lock");
-		exit(EXIT_FAILURE);
-	}
-	unlink("/var/lock/matt_daemon.lock");
-	reporter->info("Ended");
-}
-
-int main()
-{
-	if (getuid())
-	{
-		std::cerr << "You must run matt_daemon as root" << std::endl;
-		return (EXIT_FAILURE);
-	}
 	int lol = fork();
 	if (lol == -1)
 		std::cerr << "Failed to create daemon" << std::endl;
 	else if (lol == 0)
-		run();
+		run(lockfd);
 	return (EXIT_SUCCESS);
 }
