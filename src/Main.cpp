@@ -10,11 +10,14 @@
 #include <cstring>
 #include <vector>
 #include <csignal>
+#include <poll.h>
 
 Tintin_reporter *reporter = NULL;
 
 void listen()
 {
+	struct pollfd tmp;
+	std::vector<struct pollfd> polls;
 	reporter->info("Creating server");
 	int sockfd;
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
@@ -85,8 +88,13 @@ void listen()
 		}
 		reporter->info("New client");
 		clients.push_back(newsock);
+		tmp.fd = newsock;
+		tmp.events = POLLIN | POLLPRI;
+		tmp.revents = 0;
+		polls.push_back(tmp);
 		datas.push_back(std::string());
 		readClients:
+		poll(&polls.front(), polls.size(), 10);
 		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
 		{
 			ssize_t result;
