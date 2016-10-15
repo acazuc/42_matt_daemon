@@ -162,15 +162,65 @@ void signal_handler(int sig)
 		else if (sig == SIGSEGV)
 			signame = "SIGSEGV";
 		else if (sig == SIGPIPE)
-			signame = "SIGSEGV";
+			signame = "SIGPIPE";
+		else if (sig == SIGALRM)
+			signame = "SIGALRM";
 		else if (sig == SIGTERM)
 			signame = "SIGTERM";
+		else if (sig == SIGUSR1)
+			signame = "SIGUSR1";
+		else if (sig == SIGUSR2)
+			signame = "SIGUSR2";
+		else if (sig == SIGCHLD)
+			signame = "SIGCHLD";
+		else if (sig == SIGCONT)
+			signame = "SIGCONT";
+		else if (sig == SIGSTOP)
+			signame = "SIGSTOP";
+		else if (sig == SIGTSTP)
+			signame = "SIGTSTP";
+		else if (sig == SIGTTIN)
+			signame = "SIGTTIN";
+		else if (sig == SIGTTOU)
+			signame = "SIGTTOU";
 		else if (sig == SIGBUS)
 			signame = "SIGBUS";
-		else if (sig == SIGTRAP)
-			signame = "SIGTRAP";
+		else if (sig == SIGPOLL)
+			signame = "SIGPOLL";
+		else if (sig == SIGPROF)
+			signame = "SIGPROF";
 		else if (sig == SIGSYS)
 			signame = "SIGSYS";
+		else if (sig == SIGTRAP)
+			signame = "SIGTRAP";
+		else if (sig == SIGURG)
+			signame = "SIGURG";
+		else if (sig == SIGVTALRM)
+			signame = "SIGVTALRM";
+		else if (sig == SIGXCPU)
+			signame = "SIGXCPU";
+		else if (sig == SIGXFSZ)
+			signame = "SIGXFSZ";
+		else if (sig == SIGIOT)
+			signame = "SIGIOT";
+		else if (sig == SIGEMT)
+			signame = "SIGEMT";
+		else if (sig == SIGSTKFLT)
+			signame = "SIGSTKFLT";
+		else if (sig == SIGIO)
+			signame = "SIGIO";
+		else if (sig == SIGCLD)
+			signame = "SIGCLD";
+		else if (sig == SIGPWR)
+			signame = "SIGPWR";
+		else if (sig == SIGINFO)
+			signame = "SIGINFO";
+		else if (sig == SIGLOST)
+			signame = "SIGLOST";
+		else if (sig == SIGWINCH)
+			signame = "SIGWINCH";
+		else if (sig == SIGUNUSED)
+			signame = "SIGUNUSED";
 		reporter.error("Received signal: " + signame);
 	}
 	catch (std::exception &e)
@@ -187,15 +237,15 @@ void run(int lockfd)
 		reporter->error("Can't chdir to /");
 		exit(EXIT_FAILURE);
 	}
+	if (setsid() == -1)
+	{
+		reporter->error("Can't setsid");
+		exit(EXIT_FAILURE);
+	}
 	int nullop = open("/dev/null", O_RDWR);
 	if (nullop == -1)
 	{
 		reporter->error("Can't open /dev/null");
-		exit(EXIT_FAILURE);
-	}
-	if (setsid() == -1)
-	{
-		reporter->error("Can't setsid");
 		exit(EXIT_FAILURE);
 	}
 	if (dup2(nullop, 0) == -1 || dup2(nullop, 1) == -1 || dup2(nullop, 2) == -1)
@@ -203,6 +253,7 @@ void run(int lockfd)
 		reporter->error("can't redirect stdin/stdout/stderr to /dev/null");
 		exit(EXIT_FAILURE);
 	}
+	close(nullop);
 	signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, signal_handler);
@@ -212,11 +263,35 @@ void run(int lockfd)
 	signal(SIGKILL, signal_handler);
 	signal(SIGSEGV, signal_handler);
 	signal(SIGPIPE, signal_handler);
-
+	signal(SIGALRM, signal_handler);
 	signal(SIGTERM, signal_handler);
+	signal(SIGUSR1, signal_handler);
+	signal(SIGUSR2, signal_handler);
+	signal(SIGCHLD, signal_handler);
+	signal(SIGCONT, signal_handler);
+	signal(SIGSTOP, signal_handler);
+	signal(SIGTSTP, signal_handler);
+	signal(SIGTTIN, signal_handler);
+	signal(SIGTTOU, signal_handler);
 	signal(SIGBUS, signal_handler);
-	signal(SIGTRAP, signal_handler);
+	signal(SIGPOLL, signal_handler);
+	signal(SIGPROF, signal_handler);
 	signal(SIGSYS, signal_handler);
+	signal(SIGTRAP, signal_handler);
+	signal(SIGURG, signal_handler);
+	signal(SIGVTALRM, signal_handler);
+	signal(SIGXCPU, signal_handler);
+	signal(SIGXFSZ, signal_handler);
+	signal(SIGIOT, signal_handler);
+	signal(SIGEMT, signal_handler);
+	signal(SIGSTKFLT, signal_handler);
+	signal(SIGIO, signal_handler);
+	signal(SIGCLD, signal_handler);
+	signal(SIGPWR, signal_handler);
+	signal(SIGINFO, signal_handler);
+	signal(SIGLOST, signal_handler);
+	signal(SIGWINCH, signal_handler);
+	signal(SIGUNUSED, signal_handler);
 	reporter->info("Started");
 	listen();
 	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
