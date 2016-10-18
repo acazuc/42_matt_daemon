@@ -32,23 +32,27 @@ void listen()
 	server_addr.sin_port = htons(4242);
 	if (bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
+		close(sockfd);
 		reporter->error("Failed to bind socket");
 		return;
 	}
 	if (listen(sockfd, 255) == -1)
 	{
+		close(sockfd);
 		reporter->error("Failed to listen socket");
 		return;
 	}
 	int flags = fcntl(sockfd, F_GETFL, 0);
 	if (flags < 0)
 	{
+		close(sockfd);
 		reporter->error("Failed to set non blocking socket on client");
 		return;
 	}
 	flags |= O_NONBLOCK;
 	if (fcntl(sockfd, F_SETFL, flags) == -1)
 	{
+		close(sockfd);
 		reporter->error("Failed to set non blocking socket");
 		return;
 	}
@@ -64,6 +68,7 @@ void listen()
 		{
 			if (errno != EWOULDBLOCK && errno != EAGAIN)
 			{
+				close(sockfd);
 				reporter->error("Failed to accept new client on socket");
 				return;
 			}
@@ -72,19 +77,17 @@ void listen()
 		if (clients.size() >= 3)
 		{
 			close(newsock);
+			reporter->info("Client number limit reached");
 			goto readClients;
 		}
-		flags = fcntl(sockfd, F_GETFL, 0);
-		if (flags < 0)
+		struct timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000;
+		if (setsockopt(newsock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
 		{
-			reporter->error("Failed to set non blocking socket on client");
+			close(sockfd);
+			reporter->error("Failed setsockopt timeout");
 			return;
-		}
-		flags |= O_NONBLOCK;
-		if (fcntl(sockfd, F_SETFL, flags) == -1)
-		{
-			reporter->error("Failed to set non blocking socket on client");
-			continue;
 		}
 		reporter->info("New client");
 		clients.push_back(newsock);
@@ -93,7 +96,7 @@ void listen()
 		tmp.revents = 0;
 		polls.push_back(tmp);
 		datas.push_back(std::string());
-		readClients:
+readClients:
 		poll(&polls.front(), polls.size(), 10);
 		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
 		{
@@ -105,6 +108,7 @@ void listen()
 				{
 					if (!datas[i].compare("quit"))
 					{
+						close(sockfd);
 						reporter->info("Request quit");
 						return;
 					}
@@ -123,6 +127,7 @@ void listen()
 			}
 		}
 	}
+	close(sockfd);
 }
 
 bool checkdir()
@@ -211,8 +216,6 @@ void signal_handler(int sig)
 			signame = "SIGXFSZ";
 		else if (sig == SIGIOT)
 			signame = "SIGIOT";
-		else if (sig == SIGEMT)
-			signame = "SIGEMT";
 		else if (sig == SIGSTKFLT)
 			signame = "SIGSTKFLT";
 		else if (sig == SIGIO)
@@ -221,10 +224,6 @@ void signal_handler(int sig)
 			signame = "SIGCLD";
 		else if (sig == SIGPWR)
 			signame = "SIGPWR";
-		else if (sig == SIGINFO)
-			signame = "SIGINFO";
-		else if (sig == SIGLOST)
-			signame = "SIGLOST";
 		else if (sig == SIGWINCH)
 			signame = "SIGWINCH";
 		else if (sig == SIGUNUSED)
@@ -291,13 +290,10 @@ void run(int lockfd)
 	signal(SIGXCPU, signal_handler);
 	signal(SIGXFSZ, signal_handler);
 	signal(SIGIOT, signal_handler);
-	signal(SIGEMT, signal_handler);
 	signal(SIGSTKFLT, signal_handler);
 	signal(SIGIO, signal_handler);
 	signal(SIGCLD, signal_handler);
 	signal(SIGPWR, signal_handler);
-	signal(SIGINFO, signal_handler);
-	signal(SIGLOST, signal_handler);
 	signal(SIGWINCH, signal_handler);
 	signal(SIGUNUSED, signal_handler);
 	reporter->info("Started");
