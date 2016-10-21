@@ -234,6 +234,7 @@ void signal_handler(int sig)
 	{
 		std::cerr << "Can't append signal /var/log/matt_daemon/matt_daemon.log" << std::endl;
 	}
+	unlink("/var/lock/matt_daemon.lock");
 	exit(EXIT_FAILURE);
 }
 
