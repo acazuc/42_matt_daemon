@@ -261,7 +261,6 @@ void run(int lockfd)
 		reporter->error("can't redirect stdin/stdout/stderr to /dev/null");
 		exit(EXIT_FAILURE);
 	}
-	close(nullop);
 	signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, signal_handler);
