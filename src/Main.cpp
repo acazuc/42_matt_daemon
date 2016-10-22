@@ -297,7 +297,7 @@ void run(int lockfd)
 	signal(SIGPWR, signal_handler);
 	signal(SIGWINCH, signal_handler);
 	signal(SIGUNUSED, signal_handler);
-	reporter->info("Started");
+	reporter->info("Signals binded, sucessfully daemonized");
 	listen();
 	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
 	{
