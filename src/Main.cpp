@@ -137,13 +137,26 @@ bool checkdir()
 	{
 		if (mkdir("/var/log/matt_daemon", 0755) == -1)
 		{
-			std::cerr << "Can't create /var/log/matt_daemon directory" << std::endl;
-			return (false);
+			try
+			{
+				std::cerr << "Can't create /var/log/matt_daemon directory" << std::endl;
+			}
+			catch (std::exception &e)
+			{
+				// None of my business
+			}return (false);
 		}
 	}
 	else if (!S_ISDIR(d4rkh4xx0r.st_mode))
 	{
-		std::cerr << "File /var/log/matt_daemon already exists and is not a directory" << std::endl;
+		try
+		{
+			std::cerr << "File /var/log/matt_daemon already exists and is not a directory" << std::endl;
+		}
+		catch (std::exception &e)
+		{
+			// None of my business
+		}
 		return (false);
 	}
 	return (true);
